@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action, api_view
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
@@ -12,28 +12,20 @@ from .permissions import IsAuthorOrReadOnly, IsUserProfileorReadOnly, IsFollowin
 from itertools import chain
 
 # Create your views here.
-class UserProfileViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
+class UserProfileViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin , GenericViewSet):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [IsUserProfileorReadOnly, IsAuthenticated]
 
 
-    @action(detail=False, methods=['GET','POST', 'PUT'])
+    @action(detail=False, methods=['GET'])
     def me(self, request):
         if request.method == 'GET':
             queryset = get_object_or_404(UserProfile, user=request.user)
             serializer = UserProfileSerializer(queryset)
             return Response(serializer.data)
-        if request.method == 'POST':
-            queryset = UserProfile.objects.create(user=request.user)
-            serializer = UserProfileSerializer(queryset)
-            return Response(serializer.data)
-        elif request.method == 'PUT':
-            serializer = UserProfileSerializer(UserProfile, data=request.data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
-
+       
+       
 
 
 class MessgaeViewSet(ModelViewSet):
